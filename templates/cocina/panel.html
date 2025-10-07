@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel de Cocina - MANCHAS{% endblock %}
+
+{% block content %}
+<div x-data="cocinaApp()" class="min-h-screen bg-gray-900 p-6">
+    
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- Header -->
+        <div class="bg-yellow-400 text-black p-6 rounded-xl shadow-xl mb-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-4xl font-bold flex items-center gap-3">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                    </svg>
+                    Panel de Cocina
+                </h1>
+                
+                <div class="text-right">
+                    <div class="text-2xl font-bold" x-text="pedidosPendientes + ' Pendientes'"></div>
+                    <div class="text-sm" x-text="new Date().toLocaleTimeString('es-MX')"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Estadísticas Rápidas -->
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="bg-red-500 text-white rounded-lg p-4 text-center">
+                <div class="text-3xl font-bold" x-text="pedidosPendientes"></div>
+                <div class="text-sm">Pendientes</div>
+            </div>
+            <div class="bg-yellow-500 text-white rounded-lg p-4 text-center">
+                <div class="text-3xl font-bold" x-text="pedidosPreparando"></div>
+                <div class="text-sm">Preparando</div>
+            </div>
+            <div class="bg-green-500 text-white rounded-lg p-4 text-center">
+                <div class="text-3xl font-bold" x-text="pedidosListos"></div>
+                <div class="text-sm">Listos</div>
+            </div>
+        </div>
+        
+        <!-- Grid de Pedidos -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            
+            <template x-for="pedido in pedidos" :key="pedido.id">
+                <div 
+                    :class="{
+                        'bg-red-50 border-4 border-red-500': pedido.estado === 'pendiente',
+                        'bg-yellow-50 border-4 border-yellow-500': pedido.estado === 'preparando',
+                        'bg-green-50 border-4 border-green-500': pedido.estado === 'listo'
+                    }"
+                    class="rounded-xl shadow-2xl overflow-hidden">
+                    
+                    <!-- Header del Pedido -->
+                    <div 
+                        :class="{
+                            'bg-red-500': pedido.estado === 'pendiente',
+                            'bg-yellow-500': pedido.estado === 'preparando',
+                            'bg-green-500': pedido.estado === 'listo'
+                        }"
+                        class="p-4 text-white font-bold">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-2xl" x-text="pedido.mesa"></div>
+                                <div class="text-sm opacity-90" x-text="'Pedido ' + pedido.numero"></div>
+                            </div>
+                            <div class="text-right">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span x-text="new Date(pedido.creado).toLocaleTimeString('es-MX', {hour: '2-digit', minute: '2-digit'})"></span>
+                                </div>
+                                <div class="text-xs" x-text="tiempoTranscurrido(pedido.creado)"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Items del Pedido -->
+                    <div class="p-4">
+                        <div class="space-y-3 mb-4">
+                            <template x-for="item in pedido.items" :key="item.id">
+                                <div class="bg-white rounded-lg p-3 border-2 border-gray-200">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-2">
+                                                <span class="font-bold text-2xl text-yellow-600" x-text="item.cantidad + 'x'"></span>
+                                                <span class="font-semibold text-lg" x-text="item.producto__nombre"></span>
+                                            </div>
+                                            <div x-show="item.sabor__nombre" class="mt-1">
+                                                <span class="text-sm bg-yellow-200 text-yellow-800 px-2 py-1 rounded" x-text="'Sabor: ' + item.sabor__nombre"></span>
+                                            </div>
+                                            <div x-show="item.notas" class="mt-2 text-sm text-gray-600 italic" x-text="'Nota: ' + item.notas"></div>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mt-1" x-text="item.producto__descripcion"></p>
+                                </div>
+                            </template>
+                        </div>
+                        
+                        <!-- Notas del Pedido -->
+                        <div x-show="pedido.notas" class="bg-blue-50 border-l-4 border-blue-500 p-3 mb-4">
+                            <div class="font-semibold text-sm text-blue-900">Notas Especiales:</div>
+                            <div class="text-sm text-blue-800" x-text="pedido.notas"></div>
+                        </div>
+                        
+                        <!-- Botones de Acción -->
+                        <div class="flex gap-2">
+                            <template x-if="pedido.estado === 'pendiente'">
+                                <button 
+                                    @click="cambiarEstado(pedido.id, 'preparando')"
+                                    class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 rounded-lg transition-all shadow-lg">
+                                    🔥 Empezar a Preparar
+                                </button>
+                            </template>
+                            
+                            <template x-if="pedido.estado === 'preparando'">
+                                <button 
+                                    @click="cambiarEstado(pedido.id, 'listo')"
+                                    class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition-all shadow-lg flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Marcar Listo
+                                </button>
+                            </template>
+                            
+                            <template x-if="pedido.estado === 'listo'">
+                                <button 
+                                    @click="cambiarEstado(pedido.id, 'entregado')"
+                                    class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-all shadow-lg">
+                                    ✓ Entregar
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            
+        </div>
+        
+        <!-- Mensaje cuando no hay pedidos -->
+        <div x-show="pedidos.length === 0" class="text-center text-white mt-12">
+            <svg class="w-20 h-20 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+            </svg>
+            <p class="text-2xl font-semibold">No hay pedidos pendientes</p>
+            <p class="text-gray-400 mt-2">¡Todo listo en la cocina! 🎉</p>
+        </div>
+        
+    </div>
+    
+</div>
+
+<script>
+function cocinaApp() {
+    return {
+        pedidos: [],
+        
+        init() {
+            this.cargarPedidos();
+            // Actualizar cada 10 segundos
+            setInterval(() => this.cargarPedidos(), 10000);
+        },
+        
+        async cargarPedidos() {
+            try {
+                const response = await fetch('{% url "cocina:pedidos_activos" %}');
+                const data = await response.json();
+                
+                // Enriquecer con items
+                for (let pedido of data) {
+                    if (!pedido.items) {
+                        const detalle = await this.obtenerDetallePedido(pedido.id);
+                        pedido.items = detalle.items;
+                        pedido.notas = detalle.notas;
+                    }
+                }
+                
+                this.pedidos = data;
+            } catch (error) {
+                console.error('Error al cargar pedidos:', error);
+            }
+        },
+        
+        async obtenerDetallePedido(id) {
+            // Esta función necesitaría un endpoint adicional o incluir los items en pedidos_activos
+            // Por ahora retornamos estructura vacía
+            return { items: [], notas: '' };
+        },
+        
+        async cambiarEstado(pedidoId, nuevoEstado) {
+            try {
+                const formData = new FormData();
+                formData.append('estado', nuevoEstado);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                
+                const response = await fetch(`/cocina/actualizar/${pedidoId}/`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    await this.cargarPedidos();
+                    
+                    // Sonido o notificación
+                    if (nuevoEstado === 'listo') {
+                        this.notificarPedidoListo();
+                    }
+                }
+            } catch (error) {
+                console.error('Error al cambiar estado:', error);
+            }
+        },
+        
+        tiempoTranscurrido(fecha) {
+            const ahora = new Date();
+            const creado = new Date(fecha);
+            const diff = Math.floor((ahora - creado) / 60000); // minutos
+            
+            if (diff < 1) return 'Justo ahora';
+            if (diff === 1) return 'Hace 1 minuto';
+            if (diff < 60) return `Hace ${diff} minutos`;
+            
+            const horas = Math.floor(diff / 60);
+            return `Hace ${horas} hora${horas > 1 ? 's' : ''}`;
+        },
+        
+        notificarPedidoListo() {
+            // Aquí podrías agregar sonido o notificación push
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('¡Pedido Listo!', {
+                    body: 'Un pedido está listo para servir',
+                    icon: '{% static "img/logo.png" %}'
+                });
+            }
+        },
+        
+        get pedidosPendientes() {
+            return this.pedidos.filter(p => p.estado === 'pendiente').length;
+        },
+        
+        get pedidosPreparando() {
+            return this.pedidos.filter(p => p.estado === 'preparando').length;
+        },
+        
+        get pedidosListos() {
+            return this.pedidos.filter(p => p.estado === 'listo').length;
+        }
+    }
+}
+</script>
+
+<style>
+[x-cloak] { display: none !important; }
+</style>
+{% endblock %}

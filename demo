@@ -1,0 +1,500 @@
+import React, { useState } from 'react';
+import { ShoppingCart, ChefHat, Clock, Check, X, Plus, Minus, Printer } from 'lucide-react';
+
+// Datos del menú basados en las imágenes
+const menuData = {
+  dogos: [
+    {
+      id: 'dogo-sencillo',
+      nombre: 'Dogo Sencillo',
+      precio: 28,
+      descripcion: 'Salchicha, jitomate, cebolla, chile toreado, chile en vinagre, mayonesa, catsup y mostaza',
+      imagen: '🌭'
+    },
+    {
+      id: 'dogo-bacon',
+      nombre: 'Dogo Bacon',
+      precio: 35,
+      descripcion: 'Salchicha con tocino, jitomate, cebolla, chile toreado, chile en vinagre, mayonesa, catsup y mostaza',
+      imagen: '🌭🥓'
+    }
+  ],
+  hamburguesas: [
+    {
+      id: 'h-solitaria',
+      nombre: 'Hamburguesa Solitaria',
+      precio: 70,
+      descripcion: 'Carne de res, jitomate, cebolla, chile toreado, chile en vinagre, mayonesa, catsup, mostaza y lechuga',
+      imagen: '🍔'
+    },
+    {
+      id: 'h-bacon',
+      nombre: 'H. Bacon',
+      precio: 90,
+      descripcion: 'Carne de res, tocino, queso, jitomate, cebolla, chile toreado, chile en vinagre, mayonesa, catsup, mostaza y lechuga',
+      imagen: '🍔🥓'
+    },
+    {
+      id: 'h-omar',
+      nombre: 'H. Omar',
+      precio: 95,
+      descripcion: 'Carne de res, salchicha, tocino, queso, jitomate, cebolla, chile toreado, chile en vinagre, mayonesa, catsup, mostaza y lechuga',
+      imagen: '🍔⭐'
+    },
+    {
+      id: 'h-crazy',
+      nombre: 'H. Crazy',
+      precio: 100,
+      descripcion: 'Carne de res, salchicha, tocino, queso, jitomate, cebolla, aguacate, chile toreado, chile en vinagre, mayonesa, catsup, mostaza y lechuga',
+      imagen: '🍔🔥'
+    },
+    {
+      id: 'h-matahambre',
+      nombre: 'H. MataHambre',
+      precio: 110,
+      descripcion: 'Doble carne, salchicha, tocino, queso, jitomate, cebolla, aguacate, chile toreado, chile en vinagre, mayonesa, catsup, mostaza y lechuga',
+      imagen: '🍔🍔'
+    },
+    {
+      id: 'h-hawaiana',
+      nombre: 'H. Hawaiana',
+      precio: 120,
+      descripcion: 'Doble carne, salchicha, tocino, queso, piña, jitomate, cebolla, aguacate, chile toreado, chile en vinagre, mayonesa, catsup, mostaza y lechuga',
+      imagen: '🍔🍍'
+    }
+  ],
+  alitas: [
+    {
+      id: 'alitas-12',
+      nombre: 'Alitas (12 pzas)',
+      precio: 170,
+      descripcion: 'Orden de 12 piezas',
+      sabores: ['BBQ', 'Habanero', 'Buffalo'],
+      imagen: '🍗'
+    },
+    {
+      id: 'alitas-6',
+      nombre: 'Alitas (6 pzas)',
+      precio: 85,
+      descripcion: 'Orden de 6 piezas',
+      sabores: ['BBQ', 'Habanero', 'Buffalo'],
+      imagen: '🍗'
+    }
+  ],
+  papas: [
+    {
+      id: 'papas-francesa',
+      nombre: 'Papas a la Francesa',
+      precio: 95,
+      descripcion: 'Orden de papas fritas aderezadas con catsup y mayonesa',
+      imagen: '🍟'
+    },
+    {
+      id: 'papas-manchas',
+      nombre: 'Papas Manchas (Locas)',
+      precio: 145,
+      descripcion: 'Orden de papas a la francesa aderezadas con tocino, queso oaxaca, jitomate, cebolla, chiles en vinagre, catsup, mostaza y mayonesa',
+      imagen: '🍟🔥'
+    }
+  ],
+  otros: [
+    {
+      id: 'salchipulpos',
+      nombre: 'Salchipulpos',
+      precio: 50,
+      descripcion: 'Salchicha en forma de pulpo acompañadas con papas, mayonesa, catsup y mostaza',
+      imagen: '🐙'
+    }
+  ],
+  bebidas: [
+    {
+      id: 'refresco',
+      nombre: 'Refresco 600ml',
+      precio: 25,
+      descripcion: 'Refresco de 600ml',
+      imagen: '🥤'
+    },
+    {
+      id: 'agua',
+      nombre: 'Agua Natural 600ml',
+      precio: 12,
+      descripcion: 'Agua natural de 600ml',
+      imagen: '💧'
+    }
+  ]
+};
+
+const POS_Manchas = () => {
+  const [vista, setVista] = useState('pedidos'); // pedidos, cocina
+  const [pedidoActual, setPedidoActual] = useState([]);
+  const [pedidosCocina, setPedidosCocina] = useState([]);
+  const [categoriaActiva, setCategoriaActiva] = useState('hamburguesas');
+  const [numeroMesa, setNumeroMesa] = useState('');
+  const [modalProducto, setModalProducto] = useState(null);
+
+  const categorias = [
+    { id: 'hamburguesas', nombre: 'Hamburguesas', icono: '🍔' },
+    { id: 'dogos', nombre: 'Dogos', icono: '🌭' },
+    { id: 'alitas', nombre: 'Alitas', icono: '🍗' },
+    { id: 'papas', nombre: 'Papas', icono: '🍟' },
+    { id: 'otros', nombre: 'Otros', icono: '🐙' },
+    { id: 'bebidas', nombre: 'Bebidas', icono: '🥤' }
+  ];
+
+  const agregarAlPedido = (producto, sabor = null) => {
+    const itemExistente = pedidoActual.find(
+      item => item.id === producto.id && item.sabor === sabor
+    );
+
+    if (itemExistente) {
+      setPedidoActual(pedidoActual.map(item =>
+        item.id === producto.id && item.sabor === sabor
+          ? { ...item, cantidad: item.cantidad + 1 }
+          : item
+      ));
+    } else {
+      setPedidoActual([...pedidoActual, { ...producto, cantidad: 1, sabor }]);
+    }
+    setModalProducto(null);
+  };
+
+  const modificarCantidad = (index, delta) => {
+    const nuevoPedido = [...pedidoActual];
+    nuevoPedido[index].cantidad += delta;
+    if (nuevoPedido[index].cantidad <= 0) {
+      nuevoPedido.splice(index, 1);
+    }
+    setPedidoActual(nuevoPedido);
+  };
+
+  const calcularTotal = () => {
+    return pedidoActual.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
+  };
+
+  const enviarACocina = () => {
+    if (pedidoActual.length === 0 || !numeroMesa) {
+      alert('Por favor agrega productos y número de mesa');
+      return;
+    }
+
+    const nuevoPedido = {
+      id: Date.now(),
+      mesa: numeroMesa,
+      items: pedidoActual,
+      total: calcularTotal(),
+      hora: new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }),
+      estado: 'pendiente'
+    };
+
+    setPedidosCocina([nuevoPedido, ...pedidosCocina]);
+    setPedidoActual([]);
+    setNumeroMesa('');
+    setVista('cocina');
+  };
+
+  const cambiarEstadoPedido = (id, nuevoEstado) => {
+    setPedidosCocina(pedidosCocina.map(pedido =>
+      pedido.id === id ? { ...pedido, estado: nuevoEstado } : pedido
+    ));
+  };
+
+  // Vista de Pedidos (Mesero)
+  const VistaPedidos = () => (
+    <div className="flex h-screen bg-gray-100">
+      {/* Panel izquierdo - Menú */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="bg-yellow-400 text-black p-4 shadow-lg">
+          <h1 className="text-3xl font-bold text-center">MANCHAS</h1>
+          <p className="text-center text-sm">Tel. 753 102 1814</p>
+        </div>
+
+        {/* Categorías */}
+        <div className="bg-white border-b overflow-x-auto">
+          <div className="flex p-2 gap-2 min-w-max">
+            {categorias.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setCategoriaActiva(cat.id)}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                  categoriaActiva === cat.id
+                    ? 'bg-yellow-400 text-black shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <span className="text-xl mr-2">{cat.icono}</span>
+                {cat.nombre}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Productos */}
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {menuData[categoriaActiva]?.map(producto => (
+              <button
+                key={producto.id}
+                onClick={() => producto.sabores ? setModalProducto(producto) : agregarAlPedido(producto)}
+                className="bg-white rounded-xl p-4 shadow-md hover:shadow-xl transition-all border-2 border-transparent hover:border-yellow-400 text-left"
+              >
+                <div className="text-5xl mb-2 text-center">{producto.imagen}</div>
+                <h3 className="font-bold text-lg mb-1">{producto.nombre}</h3>
+                <p className="text-sm text-gray-600 mb-2 line-clamp-2">{producto.descripcion}</p>
+                <div className="text-2xl font-bold text-yellow-600">${producto.precio}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Panel derecho - Pedido actual */}
+      <div className="w-96 bg-white shadow-2xl flex flex-col">
+        <div className="bg-black text-yellow-400 p-4">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <ShoppingCart size={24} />
+            Pedido Actual
+          </h2>
+        </div>
+
+        <div className="p-4 border-b">
+          <label className="block text-sm font-semibold mb-2">Número de Mesa/Orden</label>
+          <input
+            type="text"
+            value={numeroMesa}
+            onChange={(e) => setNumeroMesa(e.target.value)}
+            placeholder="Ej: Mesa 5"
+            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-yellow-400 focus:outline-none"
+          />
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4">
+          {pedidoActual.length === 0 ? (
+            <div className="text-center text-gray-400 mt-8">
+              <ShoppingCart size={64} className="mx-auto mb-4 opacity-20" />
+              <p>No hay productos en el pedido</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {pedidoActual.map((item, index) => (
+                <div key={index} className="bg-gray-50 rounded-lg p-3 border">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1">
+                      <h4 className="font-semibold">{item.nombre}</h4>
+                      {item.sabor && (
+                        <span className="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">
+                          {item.sabor}
+                        </span>
+                      )}
+                    </div>
+                    <span className="font-bold text-yellow-600">${item.precio * item.cantidad}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => modificarCantidad(index, -1)}
+                        className="w-8 h-8 bg-red-500 text-white rounded-full hover:bg-red-600 flex items-center justify-center"
+                      >
+                        <Minus size={16} />
+                      </button>
+                      <span className="font-semibold w-8 text-center">{item.cantidad}</span>
+                      <button
+                        onClick={() => modificarCantidad(index, 1)}
+                        className="w-8 h-8 bg-green-500 text-white rounded-full hover:bg-green-600 flex items-center justify-center"
+                      >
+                        <Plus size={16} />
+                      </button>
+                    </div>
+                    <span className="text-sm text-gray-500">${item.precio} c/u</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="border-t p-4 bg-gray-50">
+          <div className="mb-4">
+            <div className="flex justify-between text-lg mb-2">
+              <span>Subtotal:</span>
+              <span className="font-semibold">${calcularTotal()}</span>
+            </div>
+            <div className="flex justify-between text-2xl font-bold text-yellow-600">
+              <span>TOTAL:</span>
+              <span>${calcularTotal()}</span>
+            </div>
+          </div>
+          <button
+            onClick={enviarACocina}
+            disabled={pedidoActual.length === 0 || !numeroMesa}
+            className="w-full bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-300 text-black font-bold py-4 rounded-xl transition-all shadow-lg disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            <Printer size={24} />
+            Enviar a Cocina
+          </button>
+        </div>
+      </div>
+
+      {/* Modal para seleccionar sabor */}
+      {modalProducto && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+            <h3 className="text-2xl font-bold mb-4">{modalProducto.nombre}</h3>
+            <p className="text-gray-600 mb-4">Selecciona el sabor:</p>
+            <div className="space-y-2">
+              {modalProducto.sabores.map(sabor => (
+                <button
+                  key={sabor}
+                  onClick={() => agregarAlPedido(modalProducto, sabor)}
+                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-3 rounded-lg transition-all"
+                >
+                  {sabor}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setModalProducto(null)}
+              className="w-full mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 rounded-lg transition-all"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // Vista de Cocina
+  const VistaCocina = () => (
+    <div className="min-h-screen bg-gray-900 p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-yellow-400 text-black p-6 rounded-xl shadow-xl mb-6">
+          <h1 className="text-4xl font-bold flex items-center gap-3">
+            <ChefHat size={40} />
+            Panel de Cocina
+          </h1>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {pedidosCocina.filter(p => p.estado !== 'completado').map(pedido => (
+            <div
+              key={pedido.id}
+              className={`rounded-xl shadow-2xl overflow-hidden ${
+                pedido.estado === 'pendiente' ? 'bg-red-50 border-4 border-red-500' :
+                pedido.estado === 'preparando' ? 'bg-yellow-50 border-4 border-yellow-500' :
+                'bg-white'
+              }`}
+            >
+              <div className={`p-4 text-white font-bold ${
+                pedido.estado === 'pendiente' ? 'bg-red-500' :
+                pedido.estado === 'preparando' ? 'bg-yellow-500' :
+                'bg-green-500'
+              }`}>
+                <div className="flex justify-between items-center">
+                  <span className="text-2xl">{pedido.mesa}</span>
+                  <span className="flex items-center gap-2">
+                    <Clock size={20} />
+                    {pedido.hora}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-4">
+                <div className="space-y-3 mb-4">
+                  {pedido.items.map((item, idx) => (
+                    <div key={idx} className="bg-white rounded-lg p-3 border-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <span className="font-bold text-xl">{item.cantidad}x</span>
+                          <span className="ml-2 font-semibold text-lg">{item.nombre}</span>
+                          {item.sabor && (
+                            <div className="text-sm bg-yellow-200 text-yellow-800 px-2 py-1 rounded inline-block ml-2">
+                              {item.sabor}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">{item.descripcion}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-2">
+                  {pedido.estado === 'pendiente' && (
+                    <button
+                      onClick={() => cambiarEstadoPedido(pedido.id, 'preparando')}
+                      className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 rounded-lg transition-all"
+                    >
+                      Preparar
+                    </button>
+                  )}
+                  {pedido.estado === 'preparando' && (
+                    <button
+                      onClick={() => cambiarEstadoPedido(pedido.id, 'listo')}
+                      className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2"
+                    >
+                      <Check size={20} />
+                      Marcar Listo
+                    </button>
+                  )}
+                  {pedido.estado === 'listo' && (
+                    <button
+                      onClick={() => cambiarEstadoPedido(pedido.id, 'completado')}
+                      className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-all"
+                    >
+                      Entregar
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {pedidosCocina.filter(p => p.estado !== 'completado').length === 0 && (
+          <div className="text-center text-white mt-12">
+            <ChefHat size={80} className="mx-auto mb-4 opacity-30" />
+            <p className="text-2xl">No hay pedidos pendientes</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      {/* Navegación */}
+      <div className="fixed top-4 right-4 z-50 flex gap-2">
+        <button
+          onClick={() => setVista('pedidos')}
+          className={`px-6 py-3 rounded-lg font-bold shadow-lg transition-all ${
+            vista === 'pedidos'
+              ? 'bg-yellow-400 text-black'
+              : 'bg-white text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          📱 Tomar Pedido
+        </button>
+        <button
+          onClick={() => setVista('cocina')}
+          className={`px-6 py-3 rounded-lg font-bold shadow-lg transition-all ${
+            vista === 'cocina'
+              ? 'bg-yellow-400 text-black'
+              : 'bg-white text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          👨‍🍳 Cocina
+          {pedidosCocina.filter(p => p.estado === 'pendiente').length > 0 && (
+            <span className="ml-2 bg-red-500 text-white rounded-full px-2 py-1 text-sm">
+              {pedidosCocina.filter(p => p.estado === 'pendiente').length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {vista === 'pedidos' ? <VistaPedidos /> : <VistaCocina />}
+    </div>
+  );
+};
+
+export default POS_Manchas;
