@@ -25,8 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='tu-clave-secreta-aqui')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = True
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = True
+#DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = [
     '.oyster-app-xxvub.ondigitalocean.app',
