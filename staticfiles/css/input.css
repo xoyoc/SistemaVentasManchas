@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn-manchas {
+    @apply bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg transition-all shadow-lg;
+  }
+  
+  .card-producto {
+    @apply bg-white rounded-xl p-4 shadow-md hover:shadow-xl transition-all border-2 border-transparent hover:border-yellow-400 cursor-pointer;
+  }
+  
+  .badge-estado {
+    @apply px-3 py-1 rounded-full text-white font-semibold text-sm;
+  }
+  
+  .item-pedido {
+    @apply bg-gray-50 rounded-lg p-3 border;
+  }
+}
+
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
