@@ -145,3 +145,6 @@ LOGIN_REDIRECT_URL = '/pedidos/tomar/'
 # Seguridad
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
+CSRF_TRUSTED_ORIGINS = [
+    'https://oyster-app-xxvub.ondigitalocean.app',
+]
