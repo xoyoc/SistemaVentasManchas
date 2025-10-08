@@ -28,7 +28,13 @@ SECRET_KEY = config('SECRET_KEY', default='tu-clave-secreta-aqui')
 #DEBUG = True
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['*','https://oyster-app-xxvub.ondigitalocean.app']
+ALLOWED_HOSTS = [
+    '.oyster-app-xxvub.ondigitalocean.app',
+    '.digitaloceanspaces.com',
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0'
+]
 
 
 # Application definition
