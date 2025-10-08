@@ -141,3 +141,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Configuración de login
 LOGIN_URL = '/admin/login/'
 LOGIN_REDIRECT_URL = '/pedidos/tomar/'
+
+# Seguridad
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
